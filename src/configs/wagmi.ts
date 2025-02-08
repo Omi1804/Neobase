@@ -17,7 +17,6 @@ import {
   optimism,
   arbitrum,
   base,
-  arbitrumSepolia,
   holesky,
 } from "wagmi/chains";
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
@@ -51,25 +50,15 @@ const connectors = connectorsForWallets(
 );
 
 export const config = createConfig({
-  chains: [
-    mainnet,
-    sepolia,
-    arbitrumSepolia,
-    arbitrum,
-    polygon,
-    optimism,
-    base,
-    holesky,
-  ],
+  chains: [mainnet, sepolia, arbitrum, polygon, optimism, base, holesky],
   connectors: connectors,
   transports: {
-    [mainnet.id]: http(
-      `https://eth-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
-    ),
+    [mainnet.id]: http(),
     [sepolia.id]: http(),
-    [arbitrumSepolia.id]: http(),
     [arbitrum.id]: http(),
-    [polygon.id]: http(),
+    [polygon.id]: http(
+      "https://polygon-mainnet.infura.io/v3/20381ad547034bab9d596630a5f60df5"
+    ),
     [optimism.id]: http(),
     [base.id]: http(),
     [holesky.id]: http(),

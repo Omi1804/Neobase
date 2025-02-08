@@ -8,15 +8,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
 import { darkTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { config } from "@/configs/wagmi";
+import Header from "@/components/Header";
 
 globalThis.Buffer = Buffer;
 const queryClient = new QueryClient();
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
       <head>
@@ -29,6 +28,7 @@ export default function RootLayout({
         <WagmiProvider config={config}>
           <QueryClientProvider client={queryClient}>
             <RainbowKitProvider theme={darkTheme()}>
+              <Header />
               {children}
             </RainbowKitProvider>
           </QueryClientProvider>
