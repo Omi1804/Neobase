@@ -1,10 +1,14 @@
 "use client";
-import { ChevronDown, Wallet, Loader2 } from "lucide-react";
+import { ChevronDown, Wallet, Loader2, Dot } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useAccount, useWriteContract, useReadContract } from "wagmi";
 import { parseUnits, MaxUint256 } from "ethers";
 import { selectToken } from "@/data/tokenData";
 import { oftTokenABITransfer } from "@/data/tokenData";
+import TransferHistory from "@/components/TransferHistory";
+import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { TransactionHeader } from "@/components/transactionHeader";
 
 const TokenTransferPage = () => {
   const { address, isConnected } = useAccount();
@@ -110,17 +114,10 @@ const TokenTransferPage = () => {
   const isLoading = isTransferPending || isApprovePending;
 
   return (
-    <div className="relative overflow-hidden">
-      <div className="absolute inset-0 z-0">
-        <img
-          src="/bg.png"
-          alt="background"
-          className="w-full h-full object-cover"
-        />
-      </div>
-
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen">
-        <div className="relative top-10 text-center w-[400px] backdrop-blur-lg bg-gradient-to-b from-black to-bg-black/30 rounded-2xl p-6 shadow-2xl shadow-[#4200FF] space-y-4">
+    <div className="relative overflow-hidden bg-black bg-[url('/bg.png')] bg-no-repeat bg-cover bg-center h-screen overflow-y-auto">
+      <TransactionHeader />
+      <div className="z-10 flex flex-col items-center justify-center ">
+        <div className="text-center w-[400px] backdrop-blur-lg bg-gradient-to-b from-black to-bg-black/30 rounded-2xl p-6 shadow-2xl shadow-[#4200FF] space-y-4">
           <h2 className="text-white text-left text-lg font-semibold">
             Transfer
           </h2>
@@ -257,6 +254,8 @@ const TokenTransferPage = () => {
             </button>
           )}
         </div>
+
+        <TransferHistory />
       </div>
     </div>
   );
