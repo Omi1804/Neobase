@@ -4,7 +4,6 @@ import { CircleArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const page = () => {
-  const [started, setStarted] = useState(false);
   const router = useRouter();
 
   return (
