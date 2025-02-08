@@ -49,7 +49,7 @@ const Header = () => {
                   return (
                     <button
                       onClick={openConnectModal}
-                      className="bg-gradient-to-r from-[#0029FF] to-[#000000] rounded-full px-5 py-2 flex items-center justify-center gap-2 border border-white/10 shadow-sm shadow-white/10"
+                      className="bg-gradient-to-r from-[#0029FF] to-[#000000] rounded-full px-5 py-2 flex items-center justify-center gap-2 shadow-sm shadow-white/10"
                       type="button"
                     >
                       <Wallet color="white" size={18} />
@@ -62,7 +62,7 @@ const Header = () => {
                 if (chain.unsupported) {
                   return (
                     <button
-                      className="bg-gradient-to-r from-[#0029FF] to-[#000000] rounded-full px-5 py-2 flex items-center justify-center gap-2 border border-white/10 shadow-sm shadow-white/10"
+                      className="bg-gradient-to-r from-[#0029FF] to-[#000000] rounded-full px-5 py-2 flex items-center justify-center gap-2 shadow-sm shadow-white/10"
                       onClick={openChainModal}
                       type="button"
                     >
@@ -76,7 +76,7 @@ const Header = () => {
                       onClick={openChainModal}
                       style={{ display: "flex", alignItems: "center" }}
                       type="button"
-                      className="bg-gradient-to-r from-[#0029FF] to-[#000000] rounded-full px-5 py-2 flex items-center justify-center gap-2 border border-white/10 shadow-sm shadow-white/10"
+                      className="bg-gradient-to-r from-[#0029FF] to-[#000000] rounded-full px-5 py-2 flex items-center justify-center gap-2 shadow-sm shadow-white/10"
                     >
                       {chain.hasIcon && (
                         <div
@@ -101,7 +101,7 @@ const Header = () => {
                       {chain.name}
                     </button>
                     <button
-                      className="bg-gradient-to-r from-[#0029FF] to-[#000000] rounded-full px-5 py-2 flex items-center justify-center gap-2 border border-white/10 shadow-sm shadow-white/10"
+                      className="bg-gradient-to-r from-[#0029FF] to-[#000000] rounded-full px-5 py-2 flex items-center justify-center gap-2  shadow-sm shadow-white/10"
                       onClick={openAccountModal}
                       type="button"
                     >
