@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { ChevronDown, Wallet, Loader2 } from "lucide-react";
 import { useAccount, useWriteContract, useReadContract } from "wagmi";
 import { parseUnits } from "ethers";
 import { selectToken } from "@/data/tokenData";
 import { oftTokenABITransfer } from "@/data/tokenData";
-import { BigNumberish } from "ethers";
-import { approveToken } from "@/utils/approveToken";
+import { toast } from "react-toastify";
 
 const TransferModal = () => {
   const { address: myAddress, isConnected } = useAccount();
@@ -13,19 +12,27 @@ const TransferModal = () => {
   const [tokenAmount, setTokenAmount] = useState("");
   const [showList, setShowList] = useState(false);
   const [recipientAddress, setRecipientAddress] = useState("");
-  const [needsApproval, setNeedsApproval] = useState(true);
-  const [transactionStatus, setTransactionStatus] = useState("");
 
   const {
     writeContract: writeTransfer,
     error: transferError,
     isPending: isTransferPending,
     isSuccess: isTransferSuccess,
-  } = useWriteContract();
+  }: any = useWriteContract();
 
   useEffect(() => {
-    setTransactionStatus("");
-  }, [selectedToken, tokenAmount]);
+    if (transferError) {
+      toast.error(transferError.details);
+    }
+  }, [transferError]);
+
+  useEffect(() => {
+    if (isTransferSuccess) {
+      toast.success("Transfer completed successfully!");
+      setTokenAmount("");
+      setRecipientAddress("");
+    }
+  }, [isTransferSuccess]);
 
   const handleTransfer = async () => {
     if (!selectedToken || !tokenAmount || !recipientAddress || !myAddress) {
@@ -34,7 +41,6 @@ const TransferModal = () => {
     }
 
     try {
-      setTransactionStatus("Initiating transfer...");
       const amount = parseUnits(tokenAmount, selectedToken.decimals);
 
       await writeTransfer({
@@ -45,13 +51,13 @@ const TransferModal = () => {
       });
 
       if (isTransferSuccess) {
-        setTransactionStatus("Transfer completed successfully!");
+        toast.success("Transfer completed successfully!");
         setTokenAmount("");
         setRecipientAddress("");
       }
     } catch (err) {
       console.error("Transfer error:", err);
-      setTransactionStatus("Transfer failed. Please try again.");
+      toast.error("Error transferring tokens");
     }
   };
 
@@ -134,23 +140,9 @@ const TransferModal = () => {
         />
       </div>
 
-      {transactionStatus && (
-        <div
-          className={`text-sm text-left ${
-            transactionStatus.includes("failed")
-              ? "text-red-500"
-              : transactionStatus.includes("success")
-                ? "text-green-500"
-                : "text-white"
-          }`}
-        >
-          {transactionStatus}
-        </div>
-      )}
-
       {transferError && (
         <div className="text-red-500 text-sm text-left">
-          <p>Error Approval or Transfer</p>
+          <p>Error Transfer</p>
         </div>
       )}
 
@@ -162,8 +154,14 @@ const TransferModal = () => {
             isLoading || !selectedToken || !tokenAmount || !recipientAddress
           }
         >
-          <Wallet size={18} color="white" />
-          <span className="font-bold text-sm text-white">Transfer</span>
+          {isLoading && !transferError ? (
+            <Loader2 size={18} color="white" className="animate-spin" />
+          ) : (
+            <Wallet size={18} color="white" />
+          )}
+          <span className="font-bold text-sm text-white">
+            {isLoading && !transferError ? "Transferring..." : "Transfer"}
+          </span>
         </button>
       ) : (
         <button

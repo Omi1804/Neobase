@@ -9,6 +9,7 @@ import { WagmiProvider } from "wagmi";
 import { darkTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { config } from "@/configs/wagmi";
 import Header from "@/components/Header";
+import { ToastContainer } from "react-toastify";
 
 globalThis.Buffer = Buffer;
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ export default function RootLayout({
             <RainbowKitProvider theme={darkTheme()}>
               <Header />
               {children}
+              <ToastContainer />
             </RainbowKitProvider>
           </QueryClientProvider>
         </WagmiProvider>
