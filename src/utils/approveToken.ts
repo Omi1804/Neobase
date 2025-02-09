@@ -4,17 +4,17 @@ import { oftTokenABITransfer } from "@/data/tokenData";
 export const approveToken = async ({
   selectedToken,
   tokenAmount,
-  address,
+  myAddress,
   writeApprove,
   setTransactionStatus,
 }: {
   selectedToken: any;
   tokenAmount: string;
-  address: any;
+  myAddress: any;
   writeApprove: any;
   setTransactionStatus: (status: string) => void;
 }) => {
-  if (!selectedToken || !tokenAmount || !address) return;
+  if (!selectedToken || !tokenAmount || !myAddress) return;
 
   try {
     setTransactionStatus("Initiating approval...");

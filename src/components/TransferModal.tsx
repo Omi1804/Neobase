@@ -4,10 +4,11 @@ import { useAccount, useWriteContract, useReadContract } from "wagmi";
 import { parseUnits } from "ethers";
 import { selectToken } from "@/data/tokenData";
 import { oftTokenABITransfer } from "@/data/tokenData";
+import { BigNumberish } from "ethers";
 import { approveToken } from "@/utils/approveToken";
 
 const TransferModal = () => {
-  const { address, isConnected } = useAccount();
+  const { address: myAddress, isConnected } = useAccount();
   const [selectedToken, setSelectedToken]: any = useState(null);
   const [tokenAmount, setTokenAmount] = useState("");
   const [showList, setShowList] = useState(false);
@@ -22,45 +23,12 @@ const TransferModal = () => {
     isSuccess: isTransferSuccess,
   } = useWriteContract();
 
-  const {
-    writeContract: writeApprove,
-    error: approveError,
-    isPending: isApprovePending,
-    isSuccess: isApproveSuccess,
-  } = useWriteContract();
-
-  const { data: allowance, refetch: refetchAllowance }: any = useReadContract({
-    address: selectedToken?.address,
-    abi: oftTokenABITransfer,
-    functionName: "allowance",
-    args:
-      address && selectedToken ? [address, selectedToken.address] : undefined,
-  });
-
-  useEffect(() => {
-    if (selectedToken && tokenAmount && allowance !== undefined) {
-      try {
-        const amount = parseUnits(tokenAmount, selectedToken.decimals);
-        setNeedsApproval(allowance < amount);
-      } catch (err) {
-        console.error("Error checking allowance:", err);
-      }
-    }
-  }, [tokenAmount, allowance, selectedToken]);
-
   useEffect(() => {
     setTransactionStatus("");
   }, [selectedToken, tokenAmount]);
 
-  useEffect(() => {
-    if (isApproveSuccess) {
-      setTransactionStatus("Approval successful! You can now transfer tokens.");
-      refetchAllowance();
-    }
-  }, [isApproveSuccess, refetchAllowance]);
-
   const handleTransfer = async () => {
-    if (!selectedToken || !tokenAmount || !recipientAddress || !address) {
+    if (!selectedToken || !tokenAmount || !recipientAddress || !myAddress) {
       alert("Please fill in all fields");
       return;
     }
@@ -72,8 +40,8 @@ const TransferModal = () => {
       await writeTransfer({
         address: selectedToken.address,
         abi: oftTokenABITransfer,
-        functionName: "transferFrom",
-        args: [address, recipientAddress, amount],
+        functionName: "transfer",
+        args: [recipientAddress, amount],
       });
 
       if (isTransferSuccess) {
@@ -87,7 +55,7 @@ const TransferModal = () => {
     }
   };
 
-  const isLoading = isTransferPending || isApprovePending;
+  const isLoading = isTransferPending;
 
   return (
     <div className="text-center w-[400px] backdrop-blur-lg bg-gradient-to-b from-black to-bg-black/30 rounded-2xl p-6 shadow-2xl shadow-[#4200FF] space-y-4">
@@ -180,48 +148,23 @@ const TransferModal = () => {
         </div>
       )}
 
-      {(approveError || transferError) && (
+      {transferError && (
         <div className="text-red-500 text-sm text-left">
           <p>Error Approval or Transfer</p>
         </div>
       )}
 
       {isConnected ? (
-        needsApproval ? (
-          <button
-            className="w-full mt-4 bg-gradient-to-r from-[#0029FF] to-[#000000] rounded-full px-5 py-2 flex items-center justify-center gap-2 shadow-sm shadow-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() =>
-              approveToken({
-                selectedToken,
-                tokenAmount,
-                address,
-                writeApprove,
-                setTransactionStatus,
-              })
-            }
-            disabled={isLoading || !selectedToken || !tokenAmount}
-          >
-            {isApprovePending ? (
-              <Loader2 className="animate-spin" size={18} />
-            ) : (
-              <Wallet size={18} color="white" />
-            )}
-            <span className="font-bold text-sm text-white">
-              {isApprovePending ? "Approving..." : "Approve"}
-            </span>
-          </button>
-        ) : (
-          <button
-            className="w-full mt-4 bg-gradient-to-r from-[#0029FF] to-[#000000] rounded-full px-5 py-2 flex items-center justify-center gap-2 shadow-sm shadow-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={handleTransfer}
-            disabled={
-              isLoading || !selectedToken || !tokenAmount || !recipientAddress
-            }
-          >
-            <Wallet size={18} color="white" />
-            <span className="font-bold text-sm text-white">Transfer</span>
-          </button>
-        )
+        <button
+          className="w-full mt-4 bg-gradient-to-r from-[#0029FF] to-[#000000] rounded-full px-5 py-2 flex items-center justify-center gap-2 shadow-sm shadow-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={handleTransfer}
+          disabled={
+            isLoading || !selectedToken || !tokenAmount || !recipientAddress
+          }
+        >
+          <Wallet size={18} color="white" />
+          <span className="font-bold text-sm text-white">Transfer</span>
+        </button>
       ) : (
         <button
           className="w-full mt-4 bg-gradient-to-r from-[#0029FF] to-[#000000] rounded-full px-5 py-2 flex items-center justify-center gap-2 shadow-sm shadow-white/10 disabled:opacity-50 disabled:cursor-not-allowed"

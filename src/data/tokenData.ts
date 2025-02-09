@@ -74,34 +74,26 @@ export const oftTokenABI = [
 
 export const oftTokenABITransfer = [
   {
+    constant: false,
     inputs: [
-      { name: "from", type: "address" },
-      { name: "to", type: "address" },
-      { name: "amount", type: "uint256" },
+      {
+        name: "to",
+        type: "address",
+      },
+      {
+        name: "value",
+        type: "uint256",
+      },
     ],
-    name: "transferFrom",
-    outputs: [{ name: "", type: "bool" }],
+    name: "transfer",
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+      },
+    ],
+    payable: false,
     stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      { name: "spender", type: "address" },
-      { name: "amount", type: "uint256" },
-    ],
-    name: "approve",
-    outputs: [{ name: "", type: "bool" }],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      { name: "owner", type: "address" },
-      { name: "spender", type: "address" },
-    ],
-    name: "allowance",
-    outputs: [{ name: "", type: "uint256" }],
-    stateMutability: "view",
     type: "function",
   },
 ];
