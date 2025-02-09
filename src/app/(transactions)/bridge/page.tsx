@@ -27,19 +27,12 @@ const EVM_CHAIN_IDS = {
 const Page = () => {
   const [selectedToken, setSelectedToken]: any = useState(null);
   const [showList, setShowList] = useState(false);
-  const { address, isConnected } = useAccount();
+  const { address: myaddress, isConnected } = useAccount();
+  const [recipientAddress, setRecipientAddress] = useState("");
   const { switchChain } = useSwitchChain();
   const [amount, setAmount] = useState("");
   const chainId = useChainId();
-  const [needsApproval, setNeedsApproval] = useState(true);
   console.log("🚀 ~ Page ~ chainId:", chainId);
-
-  const {
-    writeContract: writeApprove,
-    error: approveError,
-    isPending: isApprovePending,
-    isSuccess: isApproveSuccess,
-  } = useWriteContract();
 
   const {
     writeContract: writeBridge,
@@ -48,51 +41,17 @@ const Page = () => {
     isSuccess: isBridgeSuccess,
   } = useWriteContract();
 
-  const { data: balance, refetch: refetchBalance } = useReadContract({
+  const { data: tokenBalance, refetch: refetchBalance } = useReadContract({
     address: selectedToken?.address,
     abi: oftTokenABI,
     functionName: "balanceOf",
-    args: [address],
+    args: [myaddress],
   });
 
-  // Check allowance
-  const { data: allowance, refetch: refetchAllowance }: any = useReadContract({
-    address: selectedToken?.address,
-    abi: oftTokenABI,
-    functionName: "allowance",
-    args:
-      address && selectedToken ? [address, selectedToken.address] : undefined,
-  });
+  console.log("🚀 ~ Page ~ balance:", tokenBalance);
 
-  // Check if approval is needed
-  useEffect(() => {
-    if (selectedToken && amount && allowance !== undefined) {
-      try {
-        const amountBN: any = parseUnits(amount, selectedToken.decimals);
-        setNeedsApproval(allowance < amountBN);
-      } catch (err) {
-        console.error("Error checking allowance:", err);
-      }
-    }
-  }, [amount, allowance, selectedToken]);
-
-  const handleApprove = async () => {
-    if (!selectedToken || !amount || !address) return;
-
-    try {
-      await writeApprove({
-        address: selectedToken.address,
-        abi: oftTokenABI,
-        functionName: "approve",
-        // @ts-ignore
-        args: [selectedToken.address, MaxUint256],
-      });
-    } catch (err) {
-      console.error("Approval error:", err);
-    }
-  };
   const handleBridge = async () => {
-    if (!selectedToken || !amount || !address) return;
+    if (!selectedToken || !amount || !myaddress) return;
 
     // Check if on correct source chain (Polygon)
     if (chainId !== EVM_CHAIN_IDS.POLYGON) {
@@ -109,16 +68,16 @@ const Page = () => {
     try {
       const amountBN = parseUnits(amount, selectedToken.decimals);
 
-      const addressAsBytes32 = ethers.zeroPadValue(address, 32);
+      const addressAsBytes32 = ethers.zeroPadValue(recipientAddress, 32);
 
       const params = {
-        _from: address,
+        _from: myaddress,
         _dstChainId: LZ_CHAIN_IDS.ARBITRUM,
         _toAddress: addressAsBytes32,
         _amount: amountBN,
         _minAmount: amountBN,
         _callParams: {
-          refundAddress: address,
+          refundAddress: myaddress,
           zroPaymentAddress: "0x0000000000000000000000000000000000000000",
           adapterParams: "0x",
         },
@@ -142,7 +101,7 @@ const Page = () => {
     }
   };
 
-  const isLoading = isApprovePending || isBridgePending;
+  const isLoading = isBridgePending;
 
   return (
     <div className="relative overflow-hidden bg-black bg-[url('/bg.png')] bg-no-repeat bg-cover bg-center h-screen overflow-y-auto">
@@ -219,7 +178,12 @@ const Page = () => {
               </div>
             </div>
             <div className="flex px-3 justify-between items-center text-gray-400 text-sm mt-2">
-              <span>Balance: 0</span>
+              {/* <span>
+                Balance:{" "}
+                {tokenBalance
+                  ? ethers.parseUnits(tokenBalance, selectedToken.decimals)
+                  : 0}
+              </span> */}
             </div>
           </div>
 
@@ -242,56 +206,36 @@ const Page = () => {
             </div>
 
             <input
-              type="number"
+              type="text"
+              onChange={(e) => setRecipientAddress(e.target.value)}
               className="w-full text-white text-2xl bg-transparent outline-none border-none mt-2"
-              placeholder="0"
+              placeholder="0x7aB02D1...02b436c857"
             />
           </div>
 
           {/* Connect Wallet Button */}
           {isConnected ? (
-            needsApproval ? (
-              <button
-                className="w-full mt-4 bg-gradient-to-r from-[#0029FF] to-[#000000] rounded-full px-5 py-2 flex items-center justify-center gap-2 shadow-sm shadow-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={handleApprove}
-                disabled={isLoading || !selectedToken || !amount}
-              >
-                {isApprovePending ? (
-                  <Loader2 className="animate-spin" size={18} />
-                ) : (
-                  <Wallet size={18} color="white" />
-                )}
-                <span className="font-bold text-sm text-white">
-                  {isApprovePending ? "Approving..." : "Approve"}
-                </span>
-              </button>
-            ) : (
-              <button
-                className="w-full mt-4 bg-gradient-to-r from-[#0029FF] to-[#000000] rounded-full px-5 py-2 flex items-center justify-center gap-2 shadow-sm shadow-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={handleBridge}
-                disabled={isLoading || !selectedToken || !amount}
-              >
-                {isBridgePending ? (
-                  <Loader2 className="animate-spin" size={18} />
-                ) : (
-                  <Wallet size={18} color="white" />
-                )}
-                <span className="font-bold text-sm text-white">
-                  {isBridgePending ? "Bridging..." : "Bridge"}
-                </span>
-              </button>
-            )
+            <button
+              className="w-full mt-4 bg-gradient-to-r from-[#0029FF] to-[#000000] rounded-full px-5 py-2 flex items-center justify-center gap-2 shadow-sm shadow-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleBridge}
+              disabled={isLoading || !selectedToken || !amount}
+            >
+              {isBridgePending ? (
+                <Loader2 className="animate-spin" size={18} />
+              ) : (
+                <Wallet size={18} color="white" />
+              )}
+              <span className="font-bold text-sm text-white">
+                {isBridgePending ? "Bridging..." : "Bridge"}
+              </span>
+            </button>
           ) : (
             <button
-              className="w-full mt-4 bg-gradient-to-r from-[#0029FF] to-[#000000] rounded-full px-5 py-2 flex items-center justify-center gap-2 shadow-sm shadow-white/10"
-              onClick={() => {
-                /* Add your wallet connect logic here */
-              }}
+              className="w-full mt-4 bg-gradient-to-r from-[#0029FF] to-[#000000] rounded-full px-5 py-2 flex items-center justify-center gap-2 shadow-sm shadow-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={true}
             >
-              <Wallet color="white" size={18} />
-              <span className="font-bold text-sm text-white">
-                Connect Wallet
-              </span>
+              <Wallet size={18} color="white" />
+              <span className="font-bold text-sm text-white">Not Connect</span>
             </button>
           )}
         </div>

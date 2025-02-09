@@ -1,13 +1,21 @@
 import { use, useEffect, useState } from "react";
 import { ChevronDown, Wallet, Loader2 } from "lucide-react";
-import { useAccount, useWriteContract, useReadContract } from "wagmi";
+import {
+  useAccount,
+  useWriteContract,
+  useReadContract,
+  useChainId,
+} from "wagmi";
 import { parseUnits } from "ethers";
 import { selectToken } from "@/data/tokenData";
 import { oftTokenABITransfer } from "@/data/tokenData";
 import { toast } from "react-toastify";
+import { useSwitchChain } from "wagmi";
 
 const TransferModal = () => {
   const { address: myAddress, isConnected } = useAccount();
+  const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
   const [selectedToken, setSelectedToken]: any = useState(null);
   const [tokenAmount, setTokenAmount] = useState("");
   const [showList, setShowList] = useState(false);
@@ -19,6 +27,22 @@ const TransferModal = () => {
     isPending: isTransferPending,
     isSuccess: isTransferSuccess,
   }: any = useWriteContract();
+
+  useEffect(() => {
+    const checkAndSwitchChain = async () => {
+      if (chainId && chainId !== 42161 && isConnected) {
+        try {
+          await switchChain({ chainId: 42161 });
+          toast.success("Switched to Arbitrum network");
+        } catch (error) {
+          toast.error("Failed to switch network");
+          console.error("Network switch error:", error);
+        }
+      }
+    };
+
+    checkAndSwitchChain();
+  }, [chainId, isConnected, switchChain]);
 
   useEffect(() => {
     if (transferError) {
@@ -38,6 +62,18 @@ const TransferModal = () => {
     if (!selectedToken || !tokenAmount || !recipientAddress || !myAddress) {
       alert("Please fill in all fields");
       return;
+    }
+
+    if (chainId !== 42161) {
+      toast.dark("Switching to Arbitrum chain...");
+      try {
+        await switchChain({ chainId: 42161 });
+        // Wait for chain switch before proceeding
+        return;
+      } catch (error) {
+        toast.error("Failed to switch to Arbitrum");
+        return;
+      }
     }
 
     try {
