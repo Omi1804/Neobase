@@ -33,9 +33,15 @@ const TransferModal = () => {
       if (chainId && chainId !== 42161 && isConnected) {
         try {
           await switchChain({ chainId: 42161 });
-          toast.success("Switched to Arbitrum network");
+          toast.success("Switched to Arbitrum network...", {
+            position: "bottom-right",
+            theme: "dark",
+          });
         } catch (error) {
-          toast.error("Failed to switch network");
+          toast.error("Failed to switch network", {
+            position: "bottom-right",
+            theme: "dark",
+          });
           console.error("Network switch error:", error);
         }
       }
@@ -46,13 +52,19 @@ const TransferModal = () => {
 
   useEffect(() => {
     if (transferError) {
-      toast.error(transferError.details);
+      toast.error(transferError.details, {
+        position: "bottom-right",
+        theme: "dark",
+      });
     }
   }, [transferError]);
 
   useEffect(() => {
     if (isTransferSuccess) {
-      toast.success("Transfer completed successfully!");
+      toast.success("Transfer completed successfully!", {
+        position: "bottom-right",
+        theme: "dark",
+      });
       setTokenAmount("");
       setRecipientAddress("");
     }
@@ -65,14 +77,11 @@ const TransferModal = () => {
     }
 
     if (chainId !== 42161) {
-      toast.dark("Switching to Arbitrum chain...");
-      try {
-        await switchChain({ chainId: 42161 });
-        return;
-      } catch (error) {
-        toast.error("Failed to switch to Arbitrum");
-        return;
-      }
+      toast.dark("Switch to Arbitrum chain...", {
+        position: "bottom-right",
+        theme: "dark",
+      });
+      return;
     }
 
     try {
@@ -86,13 +95,19 @@ const TransferModal = () => {
       });
 
       if (isTransferSuccess) {
-        toast.success("Transfer completed successfully!");
+        toast.success("Transfer completed successfully!", {
+          position: "bottom-right",
+          theme: "dark",
+        });
         setTokenAmount("");
         setRecipientAddress("");
       }
     } catch (err) {
       console.error("Transfer error:", err);
-      toast.error("Error transferring tokens");
+      toast.error("Error transferring tokens", {
+        position: "bottom-right",
+        theme: "dark",
+      });
     }
   };
 

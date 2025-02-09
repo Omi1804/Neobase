@@ -51,8 +51,6 @@ const Page = () => {
     args: [myaddress],
   });
 
-  console.log("🚀 ~ Page ~ balance:", tokenBalance);
-
   const handleBridge = async () => {
     if (!selectedToken || !amount || !myaddress) return;
 
@@ -72,11 +70,9 @@ const Page = () => {
         _toAddress: addressAsBytes32,
         _amount: amountBN,
         _minAmount: amountBN,
-        _callParams: {
-          refundAddress: myaddress,
-          zroPaymentAddress: "0x0000000000000000000000000000000000000000",
-          adapterParams: "0x",
-        },
+        refundAddress: myaddress,
+        zroPaymentAddress: "0x0000000000000000000000000000000000000000",
+        adapterParams: "0x",
       };
 
       await writeBridge({
@@ -89,7 +85,9 @@ const Page = () => {
           params._toAddress,
           params._amount,
           params._minAmount,
-          params._callParams,
+          params.refundAddress,
+          params.zroPaymentAddress,
+          params.adapterParams,
         ],
       });
     } catch (err) {

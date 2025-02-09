@@ -20,30 +20,27 @@ export const selectToken = [
 export const oftTokenABI = [
   {
     inputs: [
-      { name: "spender", type: "address" },
-      { name: "amount", type: "uint256" },
-    ],
-    name: "approve",
-    outputs: [{ name: "", type: "bool" }],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-
-  {
-    inputs: [
-      { name: "_from", type: "address" },
-      { name: "_dstChainId", type: "uint16" },
-      { name: "_toAddress", type: "bytes32" },
-      { name: "_amount", type: "uint256" },
-      { name: "_minAmount", type: "uint256" },
+      { internalType: "address", name: "_from", type: "address" },
+      { internalType: "uint16", name: "_dstChainId", type: "uint16" },
+      { internalType: "bytes32", name: "_toAddress", type: "bytes32" },
+      { internalType: "uint256", name: "_amount", type: "uint256" },
       {
+        components: [
+          {
+            internalType: "address payable",
+            name: "refundAddress",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "zroPaymentAddress",
+            type: "address",
+          },
+          { internalType: "bytes", name: "adapterParams", type: "bytes" },
+        ],
+        internalType: "struct ICommonOFT.LzCallParams",
         name: "_callParams",
         type: "tuple",
-        components: [
-          { name: "refundAddress", type: "address" },
-          { name: "zroPaymentAddress", type: "address" },
-          { name: "adapterParams", type: "bytes" },
-        ],
       },
     ],
     name: "sendFrom",
@@ -51,21 +48,11 @@ export const oftTokenABI = [
     stateMutability: "payable",
     type: "function",
   },
+
   // Balance check
   {
     inputs: [{ name: "account", type: "address" }],
     name: "balanceOf",
-    outputs: [{ name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  // Allowance check
-  {
-    inputs: [
-      { name: "owner", type: "address" },
-      { name: "spender", type: "address" },
-    ],
-    name: "allowance",
     outputs: [{ name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
