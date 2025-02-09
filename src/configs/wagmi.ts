@@ -55,10 +55,8 @@ export const config = createConfig({
   transports: {
     [mainnet.id]: http(),
     [sepolia.id]: http(),
-    [arbitrum.id]: http(),
-    [polygon.id]: http(
-      "https://polygon-mainnet.infura.io/v3/20381ad547034bab9d596630a5f60df5"
-    ),
+    [arbitrum.id]: http("https://arb1.arbitrum.io/rpc"),
+    [polygon.id]: http("https://polygon-rpc.com"),
     [optimism.id]: http(),
     [base.id]: http(),
     [holesky.id]: http(),

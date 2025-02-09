@@ -13,6 +13,7 @@ import { ethers, parseUnits, MaxUint256 } from "ethers";
 import { oftTokenABI } from "@/data/tokenData";
 import { TransactionHeader } from "@/components/transactionHeader";
 import BridgeTransferHistory from "@/components/BridgeTransferHistory";
+import { toast } from "react-toastify";
 
 const LZ_CHAIN_IDS = {
   POLYGON: 109,
@@ -41,6 +42,8 @@ const Page = () => {
     isSuccess: isBridgeSuccess,
   } = useWriteContract();
 
+  console.log("🚀 ~ Page ~ bridgeError:", bridgeError);
+
   const { data: tokenBalance, refetch: refetchBalance } = useReadContract({
     address: selectedToken?.address,
     abi: oftTokenABI,
@@ -53,16 +56,9 @@ const Page = () => {
   const handleBridge = async () => {
     if (!selectedToken || !amount || !myaddress) return;
 
-    // Check if on correct source chain (Polygon)
     if (chainId !== EVM_CHAIN_IDS.POLYGON) {
-      try {
-        // @ts-ignore
-        await switchChain?.({ chainId: EVM_CHAIN_IDS.POLYGON });
-        return;
-      } catch (err) {
-        console.error("Failed to switch network:", err);
-        return;
-      }
+      toast.error("Please switch to Polygon network");
+      return;
     }
 
     try {
@@ -100,6 +96,22 @@ const Page = () => {
       console.error("Bridge error:", err);
     }
   };
+
+  useEffect(() => {
+    const checkAndSwitchChain = async () => {
+      if (chainId && chainId !== 137 && isConnected) {
+        try {
+          await switchChain({ chainId: 137 });
+          toast.success("Switched to Polygon network");
+        } catch (error) {
+          toast.error("Failed to switch network");
+          console.error("Network switch error:", error);
+        }
+      }
+    };
+
+    checkAndSwitchChain();
+  }, [chainId, isConnected, switchChain]);
 
   const isLoading = isBridgePending;
 

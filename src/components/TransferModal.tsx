@@ -68,7 +68,6 @@ const TransferModal = () => {
       toast.dark("Switching to Arbitrum chain...");
       try {
         await switchChain({ chainId: 42161 });
-        // Wait for chain switch before proceeding
         return;
       } catch (error) {
         toast.error("Failed to switch to Arbitrum");
